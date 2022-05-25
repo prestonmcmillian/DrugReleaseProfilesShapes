@@ -10,14 +10,15 @@ from tensorflow.kersa.models import Sequential
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Activation
+from sklearn.decomposition import PCA
 
 # import training dataset from excel file as a pandas dataframe
 dataset = pd.read_excel(r"Path where the Excel file is stored\File name.xlsx")
 np.random.shuffle(dataset)
 
-# Split into targets(X) and features (Y) for classification
-X_Classifier = dataset.drop['Shape']
-Y_Classifier = dataset['Shape']
+# Split into targets(X) and features (Y) for classification of shape
+X_Classifier_shape = dataset.drop['Shape']
+Y_Classifier_shape = dataset['Shape']
 # SVM classifier training
 X_train_classification, X_test_classification,  Y_train_classification, Y_test_classification = train_test_split(X_Classifier, Y_Classifier, test_size=0.2, random_state=25)
 clf = svm.SVC()
@@ -52,8 +53,44 @@ model = Sequential([
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
-model.fit(X_train_regression, y_test_regression, epochs=10,
-          batch_size=100,
-          validation_split=0.2)
+results_regression = model.fit(X_train_regression, y_train_regression, epochs=10,
+          batch_size=100, validation_data=(X_test_regression, y_test_regression))
 results = model.evaluate(X_test_regression,  y_test_regression, verbose = 0)
+
+loss_train = results_regression.history['train_loss']
+
+loss_val = results_regression.history['val_loss']
+
+epochs = range(1,100)
+
+plt.plot(epochs, loss_train, 'g', label='Training loss')
+
+plt.plot(epochs, loss_val, 'b', label='validation loss')
+
+plt.title('Training and Validation loss')
+
+plt.xlabel('Epochs')
+
+plt.ylabel('Loss')
+
+plt.legend()
+
+plt.show()
+
+pca = PCA(n_components=3)
+X_reduced = pca.fit_transform(X_train_classification)
+clfreduced = svm.SVC()
+clfreduced = clfreduced.fit(X_reduced, Y_train_classification)
+
+z = lambda x,y: (-clfreduced.intercept_[0]-clf.coef_[0][0]*x -clf.coef_[0][1]*y) / clf.coef_[0][2]
+tmp = np.linspace(-5,5,30)
+x,y = np.meshgrid(tmp,tmp)
+
+fig = plt.figure()
+ax  = fig.add_subplot(111, projection='3d')
+ax.plot3D(X_reduced[Y_train_classification==0,0], X_reduced[Y_train_classification==0,1], X_reduced[Y_train_classification==0,2],'ob')
+ax.plot3D(X_reduced[Y_train_classification==1,0], X_reduced[Y_train_classification==1,1], X_reduced[Y_train_classification==1,2],'sr')
+ax.plot_surface(x, y, z(x,y))
+ax.view_init(30, 60)
+plt.show()
 
