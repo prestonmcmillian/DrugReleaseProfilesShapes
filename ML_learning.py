@@ -26,7 +26,7 @@ clf.fit(X_train_classification, Y_train_classification)
 y_pred = clf.predict(X_test_classification)
 
 # Split into targets(X) and features (Y) for regression
-X_Regressor = dataset.drop['Release']
+X_Regressor = dataset.drop['Release', 'Sample ID']
 Y_Regressor = dataset['Release']
 X_train_regression, X_test_regression, y_train_regression, y_test_regression = train_test_split(X_Regressor, Y_Regressor, test_size=0.2, random_state=25)
 
