@@ -82,7 +82,7 @@ X_reduced = pca.fit_transform(X_train_classification)
 clfreduced = svm.SVC()
 clfreduced = clfreduced.fit(X_reduced, Y_train_classification)
 
-z = lambda x,y: (-clfreduced.intercept_[0]-clf.coef_[0][0]*x -clf.coef_[0][1]*y) / clf.coef_[0][2]
+z = lambda x,y: (-clfreduced.intercept_[0]-clfreduced.coef_[0][0]*x -clfreduced.coef_[0][1]*y) / clfreduced.coef_[0][2]
 tmp = np.linspace(-5,5,30)
 x,y = np.meshgrid(tmp,tmp)
 
